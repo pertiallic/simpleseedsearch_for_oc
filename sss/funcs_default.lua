@@ -64,7 +64,7 @@ end
 ---@return integer
 local function countSeeds_default (slotdatas_default)
     local c = 0
-    for data in pairs(slotdatas_default) do
+    for _, data in pairs(slotdatas_default) do
         c = c + data["size"]
     end
     return c

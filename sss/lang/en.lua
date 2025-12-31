@@ -33,4 +33,5 @@ return {
     foundnoseed = "Found no seeds",
     depositing = "Depositing: ",
     depositedseed = "Deposited %d seed(s)",
+    outofindex = "index out of range"
 }

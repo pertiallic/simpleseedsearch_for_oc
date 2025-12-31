@@ -33,4 +33,5 @@ return {
     foundnoseed = "種が見つかりませんでした",
     depositing = "搬出中: ",
     depositedseed = "%d個の種を搬出しました",
+    outofindex = "クエリの範囲外です",
 }

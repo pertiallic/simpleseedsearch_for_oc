@@ -15,4 +15,5 @@
 ---foundnoseed:string,
 ---depositing:string,
 ---depositedseed:string,
+---outofindex:string,
 ---}

@@ -79,11 +79,11 @@ if configs.ae2mode then
     print(lang.ae2mode_enabled)
 end
 
-local langs_logging = {foundnoseed = lang.foundnoseed, searching = lang.searching, deposting = lang.depositing, depositedseed = lang.depositedseed}
+local langs_logging = {foundnoseed = lang.foundnoseed, searching = lang.searching, depositing = lang.depositing, depositedseed = lang.depositedseed}
 
 while true do
     if searching then
-        io.write("query")
+        io.write(lang.query)
     end
     io.write(">>>")
     local inputarray = stringsplit(format(io.read()))
@@ -112,7 +112,7 @@ while true do
         if searching then
             local m =  math.tointeger(inputarray[2]) or -1
             query = bakeQuery(queryConcat(queries_tbl))
-            c, err = pcall(deposit_default, query, transposer, configs.fromside, configs.toside, lang, nil, nil, m)
+            c, err = pcall(deposit_default, query, transposer, configs.fromside, configs.toside, langs_logging, nil, nil, m)
         else
             query = bakeQuery(table.concat(inputarray, " ", 2))
             c, err = pcall(deposit_default, query, transposer, configs.fromside, configs.toside, langs_logging)
@@ -146,8 +146,12 @@ while true do
         print(string.format(lang.foundseed, getSeedsCountByQuery_default(queries_tbl, cropdata, datasize, lang.searching)))
     elseif searching and inputarray[1] == "delete" then
         local delpos = inputarray[2] or 1
+        if #queries_tbl - delpos < 0 then 
+            print(lang.outofindex)
+            goto continue
+        end
         table.remove(queries_tbl, #queries_tbl - delpos + 1)
-        if #queries_tbl then
+        if #queries_tbl ~= 0  then
             local cropdata, datasize = getCropStatuses_default(transposer, configs.fromside)
             print(string.format(lang.foundseed, getSeedsCountByQuery_default(queries_tbl, cropdata, datasize, lang.searching)))
         else
