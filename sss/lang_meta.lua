@@ -1,0 +1,18 @@
+---@meta
+---@alias lang {
+---introductiontext:string,
+---helptext:string,
+---queryhelptext:string,
+---ae2mode_enabled:string,
+---query:string,
+---error_message:string,
+---invalid_query:string,
+---alreadysearching:string,
+---foundseed:string,
+---noquery:string,
+---unknowncommand:string,
+---searching:string,
+---foundnoseed:string,
+---depositing:string,
+---depositedseed:string,
+---}

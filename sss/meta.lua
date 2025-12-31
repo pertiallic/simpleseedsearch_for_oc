@@ -1,0 +1,8 @@
+---@meta
+---@alias cropdata {name:string, tier:integer, resistance:integer, growth:integer, gain:integer}
+---@alias data_default {slot:integer, size:integer|nil, cropdata:cropdata|nil}
+---@alias data_defaultiter fun():data_default|nil
+---@alias querylist string[]
+---@alias rawquery string
+---@alias bakedquery string
+---@alias slotdata_default {slot:integer, size:integer|nil}

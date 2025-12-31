@@ -1,0 +1,7 @@
+local shell = require("shell")
+shell.execute("clearfile config.lua")
+shell.execute("clearfile constants.lua")
+shell.execute("clearfile luaaliases.lua")
+shell.execute("clearfile simpleseedsearch.lua")
+shell.execute("clearfile util.lua")
+shell.execute("clearfile queryhandler.lua")

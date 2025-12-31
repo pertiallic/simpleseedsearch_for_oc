@@ -1,0 +1,1 @@
+このプロジェクトは Creative Commons Attribution ShareAlike 4.0 ( CC-BY-SA-4.0 ) 下で公開されています。
