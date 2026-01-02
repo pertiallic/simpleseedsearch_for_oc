@@ -11,6 +11,8 @@ local queryhandler = require("queryhandler")
 local funcs_default = require("funcs_default")
 local lang
 --コンポーネント/components
+
+local notifier
 --デフォルト(AE2を使わないやつ)/default(non AE2)
 
 local transposer
@@ -32,6 +34,7 @@ configs.lang = config.lang
 local format = util.format
 local stringsplit = util.stringsplit
 local ifInArray = util.ifInArray
+local notify = util.notify
 local bakeQuery = queryhandler.bakeQuery
 local queryConcat = queryhandler.queryConcat
 --デフォルトモード
@@ -54,13 +57,24 @@ luaでの条件に従う
 (string.find(<name>,"veno")) and (<gr> >= 5 or <ga> >= 5)
 --]]
 
-if config.ae2mode == nil then configs.ae2mode = component.isAvailable("me_controller") end
+local alarm_component = {alarm = "os_alarm", beep = "computer", chat = "chat_box", none = nil, note = "note_block"}
+
+if configs.ae2mode == nil then configs.ae2mode = component.isAvailable("me_controller") end
+if configs.alarm == nil then 
+    for k, v in pairs(alarm_component) do
+        if component.isAvailable(v) then
+            configs.alarm = k
+        end
+    end
+end
 
 if ops.fromside then configs.fromside = sides[ops.fromside] end
 if ops.toside then configs.toside = sides[ops.toside] end
 if ops.alarm then configs.alarm = ops.alarm end
 if ops.ae2 then configs.ae2mode = true end
 if ops.lang then configs.lang = ops.lang end
+
+if alarm_component[configs.alarm] then notifier = component[alarm_component[configs.alarm]] end
 
 if configs.ae2mode then
     me_controller = component.me_controller
@@ -117,10 +131,12 @@ while true do
             query = bakeQuery(table.concat(inputarray, " ", 2))
             c, err = pcall(deposit_default, query, transposer, configs.fromside, configs.toside, langs_logging)
         end
-            if not c then
-                print(lang.error_message..err)
-                print(lang.invalid_query..query)
-            end
+        if not c then
+            print(lang.error_message..err)
+            print(lang.invalid_query..query)
+        else 
+            notify(notifier, configs.alarm, lang.finishdepositing, 24, 1)
+        end
         if searching then
             queries_tbl = {}
             searching = false
@@ -129,6 +145,8 @@ while true do
         local c,err = pcall(depositAll_default, transposer, configs.fromside, configs.toside, langs_logging)
         if not c then
             print(lang.error_message..err)
+        else 
+            notify(notifier, configs.alarm, lang.finishdepositing, 24, 1)
         end
     elseif inputarray[1] == "search" then
         if searching then

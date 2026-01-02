@@ -16,4 +16,5 @@
 ---depositing:string,
 ---depositedseed:string,
 ---outofindex:string,
+---finishdepositing:string,
 ---}

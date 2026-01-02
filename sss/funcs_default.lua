@@ -45,7 +45,7 @@ local function querySearch_default (bakedquery, datas_default, datasize, lang_se
     table.sort(found, function (a, b) return a["slot"] > b["slot"] end)
     return found
 end
---`data_default`のイテレーターとインベントリーの大きさ(=イテレーターの大きさ)を返す
+--`data_default`のイテレーターとインベントリの大きさ(=イテレーターの大きさ)を返す
 ---@param transposerproxy any
 ---@param side integer
 ---@return data_defaultiter

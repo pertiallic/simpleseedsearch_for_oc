@@ -24,3 +24,4 @@ for _,l in ipairs(lang) do
     shell.execute(string.format("wget %s/lang/%s.lua", url, l))
     shell.execute(string.format("mv %s.lua sss/lang/%s.lua", l, l))
 end
+shell.setAlias("sss", "simpleseedsearch.lua")

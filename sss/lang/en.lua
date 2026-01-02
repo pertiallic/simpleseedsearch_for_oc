@@ -27,11 +27,12 @@ return {
     invalid_query = "Maybe your query is invalid?: ",
     alreadysearching = "Already in searching mode!",
     foundseed = "Found %d seed(s)",
-    noquery = "no queries",
+    noquery = "No queries",
     unknowncommand = "Unknown command",
     searching = "Searching: ",
     foundnoseed = "Found no seeds",
     depositing = "Depositing: ",
     depositedseed = "Deposited %d seed(s)",
-    outofindex = "index out of range"
+    outofindex = "Index out of range",
+    finishdepositing = "Finished depositing",
 }

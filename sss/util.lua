@@ -70,6 +70,26 @@ local function drawProgressBar (width, progress, complete, before, written)
     term.clearLine()
     io.write(before .. generateProgressBar(width, progress, complete) .. " " .. progress .. "/" .. complete)
 end
+--通知する
+---@param proxy any
+---@param mode string
+---@param message? string
+---@param pitch? integer
+---@param time? number
+local function notify (proxy, mode, message, pitch, time)
+    if mode == "note" then
+        proxy.trigger(pitch)
+    elseif mode == "chat" then
+        proxy.say(message)
+    elseif mode == "alarm" then
+        proxy.activate()
+        ---@diagnostic disable-next-line:undefined-field
+        os.sleep(time)
+        proxy.deactivate()
+    elseif mode == "beep" then
+        proxy.beep("-")
+    end
+end
 
 return {
     trim = trim,
@@ -79,4 +99,5 @@ return {
     ifInArray = ifInArray,
     generateProgressBar = generateProgressBar,
     drawProgressBar = drawProgressBar,
+    notify = notify
 }
