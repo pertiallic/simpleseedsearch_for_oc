@@ -10,11 +10,11 @@ return {
     █▀ █▀▀ ▄▀█ █▀█ █▀▀ █ █
     ▄█ ██▄ █▀█ █▀▄ █▄▄ █▀█
 
-    v1.0.0
+    version: Latest
 
     licence: CC BY-SA 4.0
 
-    Language:English
+    Language: English
 ============================================]],
 
     helptext = [[not yet implemented. sorry!]],
