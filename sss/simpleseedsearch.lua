@@ -57,13 +57,13 @@ luaでの条件に従う
 (string.find(<name>,"veno")) and (<gr> >= 5 or <ga> >= 5)
 --]]
 
-local alarm_component = {alarm = "os_alarm", beep = "computer", chat = "chat_box", none = nil, note = "note_block"}
+local alarm_component = {{"beep" , "computer"}, {"alarm", "os_alarm"}, {"chat", "chat_box"}, {"note", "note_block"}, {"none", nil}}
 
 if configs.ae2mode == nil then configs.ae2mode = component.isAvailable("me_controller") end
 if configs.alarm == nil then 
-    for k, v in pairs(alarm_component) do
-        if component.isAvailable(v) then
-            configs.alarm = k
+    for _, p in pairs(alarm_component) do
+        if p[2] and component.isAvailable(p[2]) then
+            configs.alarm = p[1]
         end
     end
 end
@@ -135,7 +135,7 @@ while true do
             print(lang.error_message..err)
             print(lang.invalid_query..query)
         else 
-            notify(notifier, configs.alarm, lang.finishdepositing, 24, 1)
+            notify(notifier, configs.alarm, lang.finishdepositing, 14, 1)
         end
         if searching then
             queries_tbl = {}
@@ -146,7 +146,7 @@ while true do
         if not c then
             print(lang.error_message..err)
         else 
-            notify(notifier, configs.alarm, lang.finishdepositing, 24, 1)
+            notify(notifier, configs.alarm, lang.finishdepositing, 14, 1)
         end
     elseif inputarray[1] == "search" then
         if searching then
