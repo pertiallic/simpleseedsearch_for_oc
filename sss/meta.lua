@@ -6,3 +6,7 @@
 ---@alias rawquery string
 ---@alias bakedquery string
 ---@alias slotdata_default {slot:integer, size:integer|nil}
+---@alias data_ae2 {label:string, size:integer|nil, cropdata:cropdata|nil}
+---@alias data_ae2iter fun():data_ae2|nil
+---@alias stackdata_ae2 {label:string, size:integer|nil, stackcount:integer|nil}
+---@alias direction "up"|"down"|"north"|"south"|"west"|"east"

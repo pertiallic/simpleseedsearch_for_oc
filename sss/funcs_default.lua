@@ -72,13 +72,14 @@ end
 --`querylist`と`datas`から条件を満たす種の数を返す
 ---@param querylist querylist
 ---@param datas_default data_defaultiter
+---@param datasize integer
 ---@param lang_searching string
 ---@return integer
 local function getSeedsCountByQuery_default (querylist, datas_default, datasize, lang_searching)
     return countSeeds_default(querySearch_default(bakeQuery(queryConcat(querylist)),datas_default, datasize, lang_searching, -1))
 end
 --1スタック分だけ搬出する
----@param transosperproxy any
+---@param transposerproxy any
 ---@param fromside integer
 ---@param toside integer
 ---@param size integer
@@ -86,13 +87,13 @@ end
 ---@param searchstart? integer
 ---@return integer
 ---@return integer
-local function depositOneStack_default (transosperproxy, fromside, toside, size, slot, searchstart)
+local function depositOneStack_default (transposerproxy, fromside, toside, size, slot, searchstart)
     searchstart = searchstart or 1
-    local tosize = transosperproxy.getInventorySize(toside)
-    for i = searchstart, tosize do
-        local stack = transosperproxy.getStackInSlot(toside, i)
-        if stack == nil then
-            return transosperproxy.transferItem(fromside, toside, size, slot, i), i
+    local invsize = transposerproxy.getInventorySize(toside)
+    for i = searchstart, invsize do
+        local size = transposerproxy.getSlotStackSize(toside, i)
+        if size == 0 then
+            return transposerproxy.transferItem(fromside, toside, size, slot, i), i
         end
     end
     return 0, 0
@@ -103,12 +104,10 @@ end
 ---@param fromside integer
 ---@param toside integer 
 ---@param langs {foundnoseed:string, searching:string, depositing: string, depositedseed:string}
----@param datas_default? data_defaultiter
----@param datasize? integer
 ---@param m? integer
 ---@return true
-local function deposit_default (bakedquery, transposerproxy, fromside, toside, langs, datas_default, datasize, m)
-    if datas_default == nil then datas_default, datasize = getCropStatuses_default(transposerproxy, fromside) end
+local function deposit_default (bakedquery, transposerproxy, fromside, toside, langs, m)
+    local datas_default, datasize = getCropStatuses_default(transposerproxy, fromside)
     m = m or -1
     ---@diagnostic disable-next-line
     local depositQueue = querySearch_default(bakedquery, datas_default, datasize, langs.searching,m)
@@ -142,7 +141,7 @@ end
 ---@param langs {foundnoseed:string, searching:string, depositing: string, depositedseed:string}
 ---@return true
 local function depositAll_default (transposerproxy, fromside, toside, langs)
-    return deposit_default(" (true)", transposerproxy, fromside, toside, langs)
+    return deposit_default("(true)", transposerproxy, fromside, toside, langs)
 end
 --内容をすべて出力する
 ---@param transposerproxy any
@@ -161,4 +160,5 @@ return {
     deposit_default = deposit_default,
     depositAll_default = depositAll_default,
     showContents_default = showContents_default,
+    querySearch_default = querySearch_default,
 }

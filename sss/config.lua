@@ -1,10 +1,12 @@
 return{
-    ---@type boolean
+    ---@type boolean|nil
     ae2mode = false,
-    ---@type "down"|"up"|"north"|"south"|"west"|"east"
-    fromside = "west",
-    ---@type "down"|"up"|"north"|"south"|"west"|"east"
-    toside = "up",
+    ---@type direction
+    transposer_fromside = "down",
+    ---@type direction
+    transposer_toside = "west",
+    ---@type direction
+    transposer_lookside = "south",
     --mode : `none`,`note`,`chat`,`alarm`,`beep`,`nil` <br>
     --`none` : 何もしない <br>
     --`note` : note block(音ブロック)で通知 <br>
@@ -16,4 +18,12 @@ return{
     alarm = nil,
     ---@type "en"|"ja"
     lang = "ja",
+    ---@type direction
+    mainexportbus_side = "up",
+    ---@type integer
+    mainexportbus_acceleration = 3,
+    ---@type direction
+    subexportbus_side = "north",
+    ---@type integer
+    subexportbus_acceleration = 3,
 }

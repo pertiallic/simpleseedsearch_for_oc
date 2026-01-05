@@ -35,13 +35,39 @@ local function replacesub (s, cropdata)
              gsub("<ga>", tostring(cropdata["gain"] or 0)):
              gsub("<re>", tostring(cropdata["resistance"] or 0)))
 end
+--二つの値が一致するか調べる(table対応)
+---@param a any
+---@param b any
+---@return boolean
+local function tblEqual (a, b)
+  if type(a) ~= type(b) then
+    return false
+  end
+  if type(a) ~= "table" then
+    return a == b  
+  end
+  for k, v in pairs(a) do
+    if b[k] == nil then
+      return false
+    end
+  end
+  for k, v  in pairs(b) do
+    if a[k] == nil then
+      return false
+    end
+    if not tblEqual(a[k],v) then
+      return false
+    end
+  end
+  return true
+end
 --ある値が配列中にあるかを調べる
 ---@param elem any
 ---@param arr any[]
 ---@return boolean
 local function ifInArray (elem, arr)
     for _, v in pairs(arr) do
-        if v == elem then return true end
+        if tblEqual(v,elem) then return true end
     end
     return false
 end
@@ -90,14 +116,26 @@ local function notify (proxy, mode, message, pitch, time)
         proxy.beep("-")
     end
 end
+--イテレーターの大きさを返す
+---@param iter fun():any
+---@return integer
+local function countIterLen(iter)
+    local c = 0
+    for _ in iter do
+        c = c + 1
+    end
+    return c
+end
 
 return {
     trim = trim,
     stringsplit = stringsplit,
     format = format,
     replacesub = replacesub,
+    tblEqual = tblEqual,
     ifInArray = ifInArray,
     generateProgressBar = generateProgressBar,
     drawProgressBar = drawProgressBar,
-    notify = notify
+    notify = notify,
+    countIterLen = countIterLen
 }

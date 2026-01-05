@@ -4,7 +4,6 @@ local luaaliases = require("luaaliases")
 
 local replacesub = util.replacesub
 local stringsplit = util.stringsplit
-local drawProgressBar = util.drawProgressBar
 
 local queryalias = luaaliases.queryalias
 

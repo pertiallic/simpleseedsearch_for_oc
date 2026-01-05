@@ -4,6 +4,7 @@ local sss_scripts = {
     "clearall",
     "config",
     "funcs_default",
+    "funcs_ae2",
     "init",
     "luaaliases",
     "queryhandler",

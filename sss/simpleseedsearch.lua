@@ -9,32 +9,38 @@ local util = require("util")
 local shell = require("shell")
 local queryhandler = require("queryhandler")
 local funcs_default = require("funcs_default")
+local funcs_ae2 = require("funcs_ae2")
+local event = require("event")
 local lang
 --コンポーネント/components
 
 local notifier
---デフォルト(AE2を使わないやつ)/default(non AE2)
-
-local transposer
+local transposer = component.transposer
 --AE2モード/AE2 mode
 
-local me_controller, me_exportbus, database, modem
+local me_controller, me_exportbus, database
 --その他/miscs
 
 local commandsalias = luaaliases.commandalias
 local queryalias = luaaliases.queryalias
 local configs = {}
-configs.fromside = sides[config.fromside]
-configs.toside = sides[config.toside]
+configs.transposer_fromside = sides[config.transposer_fromside]
+configs.transposer_toside = sides[config.transposer_toside]
+configs.transposer_lookside = sides[config.transposer_lookside]
 configs.ae2mode = config.ae2mode
 configs.alarm = config.alarm
 configs.lang = config.lang
+configs.maineside = sides[config.mainexportbus_side]
+configs.maineacc = config.mainexportbus_acceleration
+configs.subeside = sides[config.subexportbus_side]
+configs.subeacc = config.subexportbus_acceleration
 --関数/functions
 
 local format = util.format
 local stringsplit = util.stringsplit
 local ifInArray = util.ifInArray
 local notify = util.notify
+local countIterLen = util.countIterLen
 local bakeQuery = queryhandler.bakeQuery
 local queryConcat = queryhandler.queryConcat
 --デフォルトモード
@@ -44,6 +50,13 @@ local deposit_default = funcs_default.deposit_default
 local getCropStatuses_default = funcs_default.getCropStatuses_default
 local getSeedsCountByQuery_default = funcs_default.getSeedsCountByQuery_default
 local showContents_default = funcs_default.showContents_default
+--AE2モード
+
+local depositAll_ae2 = funcs_ae2.depositAll_ae2
+local deposit_ae2 = funcs_ae2.deposit_ae2
+local getCropStatuses_ae2 = funcs_ae2.getCropStatuses_ae2
+local getSeedsCountByQuery_ae2 = funcs_ae2.getSeedsCountByQuery_ae2
+local showContents_ae2 = funcs_ae2.showContents_ae2
 
 local args, ops = shell.parse(...)
 local queries_tbl = {}
@@ -68,8 +81,8 @@ if configs.alarm == nil then
     end
 end
 
-if ops.fromside then configs.fromside = sides[ops.fromside] end
-if ops.toside then configs.toside = sides[ops.toside] end
+if ops.fromside then configs.transposer_fromside = sides[ops.fromside] end
+if ops.toside then configs.transposer_toside = sides[ops.toside] end
 if ops.alarm then configs.alarm = ops.alarm end
 if ops.ae2 then configs.ae2mode = true end
 if ops.lang then configs.lang = ops.lang end
@@ -80,9 +93,6 @@ if configs.ae2mode then
     me_controller = component.me_controller
     me_exportbus = component.me_exportbus
     database = component.database
-    modem = component.modem
-else
-    transposer = component.transposer
 end
 ---@type lang
 lang = require("lang."..configs.lang)
@@ -122,14 +132,25 @@ while true do
             print(lang.helptext)
         end
     elseif inputarray[1] == "deposit" then
-        local c, err, query
-        if searching then
-            local m =  math.tointeger(inputarray[2]) or -1
-            query = bakeQuery(queryConcat(queries_tbl))
-            c, err = pcall(deposit_default, query, transposer, configs.fromside, configs.toside, langs_logging, nil, nil, m)
+        local c, err, query, m
+        if configs.ae2mode then
+            if searching then
+                m = math.tointeger(inputarray[2]) or -1
+                query = bakeQuery(queryConcat(queries_tbl))
+            else
+                m = -1
+                query = bakeQuery(table.concat(inputarray, " ", 2))
+            end
+            c, err = pcall(deposit_ae2, query, me_controller, me_exportbus, configs.maineside, configs.subeside, configs.maineacc, configs.subacc, transposer, configs.transposer_fromside, configs.transposer_lookside, database, langs_logging, m)
         else
-            query = bakeQuery(table.concat(inputarray, " ", 2))
-            c, err = pcall(deposit_default, query, transposer, configs.fromside, configs.toside, langs_logging)
+            if searching then
+                m = math.tointeger(inputarray[2]) or -1
+                query = bakeQuery(queryConcat(queries_tbl))
+            else
+                m = -1
+                query = bakeQuery(table.concat(inputarray, " ", 2))
+            end
+            c, err = pcall(deposit_default, query, transposer, configs.transposer_fromside, configs.transposer_toside, langs_logging, m)
         end
         if not c then
             print(lang.error_message..err)
@@ -142,7 +163,12 @@ while true do
             searching = false
         end
     elseif inputarray[1] == "depositall" then
-        local c,err = pcall(depositAll_default, transposer, configs.fromside, configs.toside, langs_logging)
+        local c, err
+        if configs.ae2mode then
+            c, err = pcall(depositAll_ae2, me_controller, me_exportbus, configs.maineside, configs.subeside, configs.maineacc, configs.subacc, transposer, configs.transposer_fromside, configs.transposer_lookside, database, langs_logging)
+        else
+            c, err = pcall(depositAll_default, transposer, configs.transposer_fromside, configs.transposer_toside, langs_logging)
+        end
         if not c then
             print(lang.error_message..err)
         else 
@@ -155,13 +181,23 @@ while true do
             searching = true
         end
     elseif inputarray[1] == "showcontents" then
-        showContents_default(transposer, configs.fromside)
+        if configs.ae2mode then
+            showContents_ae2(me_controller)
+        else
+            showContents_default(transposer, configs.transposer_fromside)
+        end
     elseif inputarray[1] == "showconfig" then
         print(serialization.serialize(configs))
     elseif searching and ifInArray(inputarray[1], {"name", "growth", "gain", "resistance"}) then
         table.insert(queries_tbl,table.concat(inputarray," "))
-        local cropdata, datasize = getCropStatuses_default(transposer, configs.fromside)
-        print(string.format(lang.foundseed, getSeedsCountByQuery_default(queries_tbl, cropdata, datasize, lang.searching)))
+        if configs.ae2mode then
+            local cropdata = getCropStatuses_ae2(me_controller)
+            local datasize = countIterLen(cropdata)
+            print(string.format(lang.foundseed, getSeedsCountByQuery_ae2(queries_tbl, cropdata, datasize, lang.searching)))
+        else
+            local cropdata, datasize = getCropStatuses_default(transposer, configs.transposer_fromside)
+            print(string.format(lang.foundseed, getSeedsCountByQuery_default(queries_tbl, cropdata, datasize, lang.searching)))
+        end
     elseif searching and inputarray[1] == "delete" then
         local delpos = inputarray[2] or 1
         if #queries_tbl - delpos < 0 then 
@@ -170,8 +206,14 @@ while true do
         end
         table.remove(queries_tbl, #queries_tbl - delpos + 1)
         if #queries_tbl ~= 0  then
-            local cropdata, datasize = getCropStatuses_default(transposer, configs.fromside)
-            print(string.format(lang.foundseed, getSeedsCountByQuery_default(queries_tbl, cropdata, datasize, lang.searching)))
+            if configs.ae2mode then
+                local cropdata = getCropStatuses_ae2(me_controller)
+                local datasize = countIterLen(cropdata)
+                print(string.format(lang.foundseed, getSeedsCountByQuery_ae2(queries_tbl, cropdata, datasize, lang.searching)))
+            else
+                local cropdata, datasize = getCropStatuses_default(transposer, configs.transposer_fromside)
+                print(string.format(lang.foundseed, getSeedsCountByQuery_default(queries_tbl, cropdata, datasize, lang.searching)))
+        end
         else
             print(lang.noquery)
         end
