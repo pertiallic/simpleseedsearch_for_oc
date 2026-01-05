@@ -91,8 +91,8 @@ local function depositOneStack_default (transposerproxy, fromside, toside, size,
     searchstart = searchstart or 1
     local invsize = transposerproxy.getInventorySize(toside)
     for i = searchstart, invsize do
-        local size = transposerproxy.getSlotStackSize(toside, i)
-        if size == 0 then
+        local s = transposerproxy.getSlotStackSize(toside, i)
+        if s == 0 then
             return transposerproxy.transferItem(fromside, toside, size, slot, i), i
         end
     end

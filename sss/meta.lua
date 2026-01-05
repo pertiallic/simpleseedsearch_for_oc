@@ -8,6 +8,6 @@
 ---@alias slotdata_default {slot:integer, size:integer|nil}
 ---@alias data_ae2 {label:string, size:integer|nil, cropdata:cropdata|nil}
 ---@alias data_ae2iter fun():data_ae2|nil
----@alias stackdata_ae2 {label:string, size:integer|nil, stackcount:integer|nil}
+---@alias stackdata_ae2 {label:string, size:integer|nil, stackcount:integer|nil, matchstack:integer}
 ---@alias direction "up"|"down"|"north"|"south"|"west"|"east"
 --wget https://raw.githubusercontent.com/pertiallic/simpleseedsearch_for_oc/main/setup.lua && setup.lua

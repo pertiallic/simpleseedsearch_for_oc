@@ -48,22 +48,29 @@ local function querySearch_ae2 (bakedquery, datas_ae2, datasize, lang_searching)
         local label = data["label"]
         local size = data["size"]
         local cropdata = data["cropdata"]
+        local tmp = {label = label, size = size, stackcount = 1, matchstack = 0}
+        local ind = getDataIndex(tmp, found)
         if cropdata == nil then
             goto continue
         end
-        if size > 0 and matchQuery(bakedquery, cropdata) then
-            c = c + 1
-            local tmp = {label = label, size = size, stackcount = 1}
-            local ind = getDataIndex(tmp, found)
-            if ind == nil then
-                table.insert(found, tmp)
-            else
-                found[ind].stackcount = found[ind].stackcount + 1 
-            end
+        if ind == nil then
+            table.insert(found, tmp)
+        else
+            found[ind].stackcount = found[ind].stackcount + 1 
+        end
+        if matchQuery(bakedquery, cropdata) then
+            found[ind or #found].matchstack = found[ind or #found].matchstack + 1
         end
         ::continue::
         drawProgressBar(30, i, datasize, lang_searching)
         i = i + 1
+    end
+    for j = #found, 1, -1 do
+        if found[j].matchstack == 0 then
+            table.remove(found,j)
+        else
+            c = c + found[j].stackcount
+        end
     end
     print("")
     return found, c
@@ -84,7 +91,7 @@ end
 local function countSeeds_ae2 (stackdatas_ae2)
     local c = 0
     for _, data in pairs(stackdatas_ae2) do
-        c = c + data["size"]
+        c = c + data.size * data.matchstack
     end
     return c
 end
