@@ -1,5 +1,5 @@
 local shell = require("shell")
-local url = "https://raw.githubusercontent.com/pertiallic/simpleseedsearch_for_oc/main/sss"
+local url = "https://raw.githubusercontent.com/pertiallic/simpleseedsearch_for_oc/v2_0/sss"
 local sss_scripts = {
     "clearall",
     "config",

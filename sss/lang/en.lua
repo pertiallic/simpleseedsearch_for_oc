@@ -10,7 +10,7 @@ return {
     █▀ █▀▀ ▄▀█ █▀█ █▀▀ █ █
     ▄█ ██▄ █▀█ █▀▄ █▄▄ █▀█
 
-    version: Latest
+    version: v2.0.0
 
     licence: CC BY-SA 4.0
 
