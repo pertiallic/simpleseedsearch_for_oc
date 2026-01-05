@@ -149,19 +149,19 @@ local function deposit_ae2 (bakedquery, mecproxy, ebusproxy, mainebusside, subeb
     event.push("sss_startdepositing")
     local lastnotmatch
     while #depositQueue ~= 0 do
-        local data = depositQueue[1]
-        local label = data.label
-        local size = data.size
+        local data, label, size, stackdata, cropdata, ebusside, ebusbatch, tpside, ifmatched, s
+        data = depositQueue[1]
+        label = data.label
+        size = data.size
         mecproxy.store({label = label, size = size}, dbproxy.address, 1, 1)
-        local stackdata = dbproxy.get(1)
+        stackdata = dbproxy.get(1)
         if stackdata == nil then
             table.remove(depositQueue, 1)
             goto continue
         end
-        local cropdata = stackdata.crop
+        cropdata = stackdata.crop
         if cropdata == nil then goto continue end
-        local ebusside, ebusbatch,tpside
-        local ifmatched = matchQuery(bakedquery, cropdata)
+        ifmatched = matchQuery(bakedquery, cropdata)
         if ifmatched then
             ebusside = mainebusside
             ebusbatch = mainebusbatch
@@ -173,7 +173,7 @@ local function deposit_ae2 (bakedquery, mecproxy, ebusproxy, mainebusside, subeb
             tpside = tpfromside
         end
         ebusproxy.setExportConfiguration(mainebusside, 1, dbproxy.address, 1)
-        local s = true
+        s = true
         for j=1, math.ceil(size / ebusbatch) do
             s,i = depositOneStack_ae2(ebusproxy, ebusside, transposerproxy, tpside, i)
             if not s then
