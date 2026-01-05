@@ -10,7 +10,6 @@ local shell = require("shell")
 local queryhandler = require("queryhandler")
 local funcs_default = require("funcs_default")
 local funcs_ae2 = require("funcs_ae2")
-local event = require("event")
 local lang
 --コンポーネント/components
 
@@ -145,7 +144,7 @@ while true do
                 m = -1
                 query = bakeQuery(table.concat(inputarray, " ", 2))
             end
-            c, err = pcall(deposit_ae2, query, me_controller, me_exportbus, configs.maineside, configs.subeside, configs.maineacc, configs.subeacc, transposer, configs.transposer_fromside, configs.transposer_lookside, database, langs_logging, m)
+            c, err = pcall(deposit_ae2, query, me_controller, me_exportbus, configs.maineside, configs.subeside, configs.maineacc, configs.subeacc, transposer, configs.transposer_fromside, configs.transposer_toside, configs.transposer_lookside, database, langs_logging, m)
         else
             if searching then
                 m = math.tointeger(inputarray[2]) or -1
@@ -169,7 +168,7 @@ while true do
     elseif inputarray[1] == "depositall" then
         local c, err
         if configs.ae2mode then
-            c, err = pcall(depositAll_ae2, me_controller, me_exportbus, configs.maineside, configs.subeside, configs.maineacc, configs.subeacc, transposer, configs.transposer_fromside, configs.transposer_lookside, database, langs_logging)
+            c, err = pcall(depositAll_ae2, me_controller, me_exportbus, configs.maineside, configs.subeside, configs.maineacc, configs.subeacc, transposer, configs.transposer_fromside, configs.transposer_toside, configs.transposer_lookside, database, langs_logging)
         else
             c, err = pcall(depositAll_default, transposer, configs.transposer_fromside, configs.transposer_toside, langs_logging)
         end

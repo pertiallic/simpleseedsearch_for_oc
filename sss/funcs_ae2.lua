@@ -2,12 +2,16 @@ local serialization = require("serialization")
 local util = require("util")
 local queryhandler = require("queryhandler")
 local event = require("event")
+local thread = require("thread")
+local funcs_default = require("funcs_default")
 
 local drawProgressBar = util.drawProgressBar
 local countIterLen = util.countIterLen
+local tblEqual = util.tblEqual
 local bakeQuery = queryhandler.bakeQuery
 local matchQuery = queryhandler.matchQuery
 local queryConcat = queryhandler.queryConcat
+local depositOneStack_default = funcs_default.depositOneStack_default
 
 local batch = {1, 8, 32, 64, 96}
 local importqueue = {}
@@ -115,12 +119,39 @@ end
 local function depositOneStack_ae2 (ebusproxy, ebusside, canseeinventory, invside, searchstart)
     searchstart = searchstart or 1
     local invsize = canseeinventory.getInventorySize(invside)
-    for i=searchstart, invsize do
+    for i=invsize, searchstart, -1 do
         if canseeinventory.getSlotStackSize(invside, i) == 0 then
             return ebusproxy.exportIntoSlot(ebusside, i), i
         end 
     end
     return false, -1
+end
+--スレッド用
+---@param tpproxy any
+---@param tpfromside integer
+---@param tptoside integer
+---@return nil
+local function importfunc (tpproxy, tpfromside, tptoside)
+    event.pull("sss_startdepositing")
+    while true do
+        ::continue::
+        if #importqueue == 0 then
+            event.pull("sss_endqueue")
+        end
+        if importqueue[1] == "end" then
+            break
+        end
+        if importqueue[1] == nil then
+            table.remove(importqueue, 1)
+            goto continue
+        end
+        local d = tpproxy.getStackInSlot(tpfromside, 1)
+        local cropdata = d.crop
+        local i, _ =depositOneStack_default(tpproxy, tpfromside, tptoside, d.size, 1)
+        if i == d.size and tblEqual(cropdata, importqueue[1]) then
+            table.remove(importqueue, 1)
+        end
+    end
 end
 --クエリ、データなどからアイテムを搬出する <br>
 ---@param bakedquery bakedquery
@@ -130,14 +161,16 @@ end
 ---@param subebusside integer
 ---@param mainebusacc integer
 ---@param subebusacc integer
----@param transposerproxy any
+---@param tpproxy any
 ---@param tpfromside integer
+---@param tptoside integer
 ---@param tplookside integer
 ---@param dbproxy any
 ---@param langs {foundnoseed:string, searching:string, depositing: string, depositedseed:string}
 ---@param m? integer
 ---@return true
-local function deposit_ae2 (bakedquery, mecproxy, ebusproxy, mainebusside, subebusside, mainebusacc, subebusacc, transposerproxy, tpfromside, tplookside, dbproxy, langs, m)
+local function deposit_ae2 (bakedquery, mecproxy, ebusproxy, mainebusside, subebusside, mainebusacc, subebusacc, tpproxy, tpfromside, tptoside,tplookside, dbproxy, langs, m)
+    local importthread = thread.create(importfunc)
     local datas_ae2 = getCropStatuses_ae2(mecproxy)
     local datasize = countIterLen(mecproxy.allItems())
     m = m or -1
@@ -186,7 +219,7 @@ local function deposit_ae2 (bakedquery, mecproxy, ebusproxy, mainebusside, subeb
         dbproxy.clear(1)
         s = true
         for j=1, math.ceil(size / ebusbatch) do
-            s,i = depositOneStack_ae2(ebusproxy, ebusside, transposerproxy, tpside, i)
+            s,i = depositOneStack_ae2(ebusproxy, ebusside, tpproxy, tpside, i)
             if not s then
                 break
             end
@@ -216,6 +249,7 @@ local function deposit_ae2 (bakedquery, mecproxy, ebusproxy, mainebusside, subeb
     event.push("sss_endqueue")
     print("")
     print(string.format(langs.depositedseed, c))
+    thread.waitForAll({importthread})
     return true
 end
 --全部のアイテムを搬出する
@@ -225,14 +259,15 @@ end
 ---@param subebusside integer
 ---@param mainebusacc integer
 ---@param subebusacc integer
----@param transposerproxy any
+---@param tpproxy any
 ---@param tpfromside integer
+---@param tptoside integer
 ---@param tplookside integer
 ---@param dbproxy any
 ---@param langs {foundnoseed:string, searching:string, depositing: string, depositedseed:string}
 ---@return true
-local function depositAll_ae2 (mecproxy, ebusproxy, mainebusside, subebusside, mainebusacc, subebusacc, transposerproxy, tpfromside, tplookside, dbproxy, langs)
-    return deposit_ae2("(true)", mecproxy, ebusproxy, mainebusside, subebusside, mainebusacc, subebusacc, transposerproxy, tpfromside, tplookside, dbproxy, langs)
+local function depositAll_ae2 (mecproxy, ebusproxy, mainebusside, subebusside, mainebusacc, subebusacc, tpproxy, tpfromside, tptoside, tplookside, dbproxy, langs)
+    return deposit_ae2("(true)", mecproxy, ebusproxy, mainebusside, subebusside, mainebusacc, subebusacc, tpproxy, tpfromside, tptoside, tplookside, dbproxy, langs)
 end
 --内容をすべて出力する
 ---@param mecproxy any
