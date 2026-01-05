@@ -139,6 +139,7 @@ local function importfunc (tpproxy, tpfromside, tptoside)
             event.pull("sss_endqueue")
         end
         if importqueue[1] == "end" then
+            importqueue = {}
             break
         end
         if importqueue[1] == nil then
@@ -147,7 +148,11 @@ local function importfunc (tpproxy, tpfromside, tptoside)
         end
         local d = tpproxy.getStackInSlot(tpfromside, 1)
         local cropdata = d.crop
-        local i, _ =depositOneStack_default(tpproxy, tpfromside, tptoside, d.size, 1)
+        local c, result = pcall(depositOneStack_default, tpproxy, tpfromside, tptoside, d.size, 1)
+        local i = 0
+        if c then
+            i = result
+        end
         if i == d.size and tblEqual(cropdata, importqueue[1]) then
             table.remove(importqueue, 1)
         end
@@ -169,8 +174,8 @@ end
 ---@param langs {foundnoseed:string, searching:string, depositing: string, depositedseed:string}
 ---@param m? integer
 ---@return true
-local function deposit_ae2 (bakedquery, mecproxy, ebusproxy, mainebusside, subebusside, mainebusacc, subebusacc, tpproxy, tpfromside, tptoside,tplookside, dbproxy, langs, m)
-    local importthread = thread.create(importfunc)
+local function deposit_ae2 (bakedquery, mecproxy, ebusproxy, mainebusside, subebusside, mainebusacc, subebusacc, tpproxy, tpfromside, tptoside, tplookside, dbproxy, langs, m)
+    local importthread = thread.create(importfunc, tpproxy, tpfromside, tptoside)
     local datas_ae2 = getCropStatuses_ae2(mecproxy)
     local datasize = countIterLen(mecproxy.allItems())
     m = m or -1
