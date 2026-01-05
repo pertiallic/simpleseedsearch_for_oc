@@ -58,7 +58,7 @@ local function querySearch_ae2 (bakedquery, datas_ae2, datasize, lang_searching)
             if ind == nil then
                 table.insert(found, tmp)
             else
-                table[ind].stackcount = table[ind].stackcount + 1 
+                found[ind].stackcount = found[ind].stackcount + 1 
             end
         end
         ::continue::
@@ -149,7 +149,8 @@ local function deposit_ae2 (bakedquery, mecproxy, ebusproxy, mainebusside, subeb
     event.push("sss_startdepositing")
     local lastnotmatch
     while #depositQueue ~= 0 do
-        local data, label, size, stackdata, cropdata, ebusside, ebusbatch, tpside, ifmatched, s
+        local data, label, size, stackdata, cropdata, ebusside, ebusbatch, tpside, ifmatched, s, maini
+        maini = i
         data = depositQueue[1]
         label = data.label
         size = data.size
@@ -163,16 +164,19 @@ local function deposit_ae2 (bakedquery, mecproxy, ebusproxy, mainebusside, subeb
         if cropdata == nil then goto continue end
         ifmatched = matchQuery(bakedquery, cropdata)
         if ifmatched then
+            i = maini
             ebusside = mainebusside
             ebusbatch = mainebusbatch
             tpside = tplookside
         else
+            i = 1
             lastnotmatch = cropdata
             ebusside = subebusside
             ebusbatch = subebusbatch
             tpside = tpfromside
         end
-        ebusproxy.setExportConfiguration(mainebusside, 1, dbproxy.address, 1)
+        ebusproxy.setExportConfiguration(ebusside, 1, dbproxy.address, 1)
+        dbproxy.clear(1)
         s = true
         for j=1, math.ceil(size / ebusbatch) do
             s,i = depositOneStack_ae2(ebusproxy, ebusside, transposerproxy, tpside, i)
@@ -181,6 +185,7 @@ local function deposit_ae2 (bakedquery, mecproxy, ebusproxy, mainebusside, subeb
             end
             if ifmatched then
                 c = c + math.min(size - ebusbatch * (j - 1), ebusbatch)
+                maini = i
             end
             if m ~= -1 and c >= m then
                 break

@@ -1,6 +1,6 @@
 return{
     ---@type boolean|nil
-    ae2mode = false,
+    ae2mode = nil,
     ---@type direction
     transposer_fromside = "down",
     ---@type direction

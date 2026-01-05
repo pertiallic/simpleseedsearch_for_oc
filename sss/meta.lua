@@ -10,3 +10,4 @@
 ---@alias data_ae2iter fun():data_ae2|nil
 ---@alias stackdata_ae2 {label:string, size:integer|nil, stackcount:integer|nil}
 ---@alias direction "up"|"down"|"north"|"south"|"west"|"east"
+--wget https://raw.githubusercontent.com/pertiallic/simpleseedsearch_for_oc/main/setup.lua && setup.lua
