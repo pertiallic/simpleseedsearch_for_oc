@@ -132,7 +132,7 @@ end
 ---@return true
 local function deposit_ae2 (bakedquery, mecproxy, ebusproxy, mainebusside, subebusside, mainebusacc, subebusacc, transposerproxy, tpfromside, tplookside, dbproxy, langs, m)
     local datas_ae2 = getCropStatuses_ae2(mecproxy)
-    local datasize = countIterLen(datas_ae2)
+    local datasize = countIterLen(mecproxy.allItems())
     m = m or -1
     local mainebusbatch = batch[mainebusacc + 1]
     local subebusbatch = batch[subebusacc + 1]

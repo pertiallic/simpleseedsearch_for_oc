@@ -87,7 +87,11 @@ if ops.alarm then configs.alarm = ops.alarm end
 if ops.ae2 then configs.ae2mode = true end
 if ops.lang then configs.lang = ops.lang end
 
-if alarm_component[configs.alarm] then notifier = component[alarm_component[configs.alarm]] end
+for _, p in ipairs(alarm_component) do
+    if p[1] == configs.alarm and p[2] then
+        notifier = component[p[2]]
+    end
+end
 
 if configs.ae2mode then
     me_controller = component.me_controller
@@ -141,7 +145,7 @@ while true do
                 m = -1
                 query = bakeQuery(table.concat(inputarray, " ", 2))
             end
-            c, err = pcall(deposit_ae2, query, me_controller, me_exportbus, configs.maineside, configs.subeside, configs.maineacc, configs.subacc, transposer, configs.transposer_fromside, configs.transposer_lookside, database, langs_logging, m)
+            c, err = pcall(deposit_ae2, query, me_controller, me_exportbus, configs.maineside, configs.subeside, configs.maineacc, configs.subeacc, transposer, configs.transposer_fromside, configs.transposer_lookside, database, langs_logging, m)
         else
             if searching then
                 m = math.tointeger(inputarray[2]) or -1
@@ -165,7 +169,7 @@ while true do
     elseif inputarray[1] == "depositall" then
         local c, err
         if configs.ae2mode then
-            c, err = pcall(depositAll_ae2, me_controller, me_exportbus, configs.maineside, configs.subeside, configs.maineacc, configs.subacc, transposer, configs.transposer_fromside, configs.transposer_lookside, database, langs_logging)
+            c, err = pcall(depositAll_ae2, me_controller, me_exportbus, configs.maineside, configs.subeside, configs.maineacc, configs.subeacc, transposer, configs.transposer_fromside, configs.transposer_lookside, database, langs_logging)
         else
             c, err = pcall(depositAll_default, transposer, configs.transposer_fromside, configs.transposer_toside, langs_logging)
         end
@@ -192,7 +196,7 @@ while true do
         table.insert(queries_tbl,table.concat(inputarray," "))
         if configs.ae2mode then
             local cropdata = getCropStatuses_ae2(me_controller)
-            local datasize = countIterLen(cropdata)
+            local datasize = countIterLen(me_controller.allItems())
             print(string.format(lang.foundseed, getSeedsCountByQuery_ae2(queries_tbl, cropdata, datasize, lang.searching)))
         else
             local cropdata, datasize = getCropStatuses_default(transposer, configs.transposer_fromside)
@@ -208,7 +212,7 @@ while true do
         if #queries_tbl ~= 0  then
             if configs.ae2mode then
                 local cropdata = getCropStatuses_ae2(me_controller)
-                local datasize = countIterLen(cropdata)
+                local datasize = countIterLen(me_controller.allItems())
                 print(string.format(lang.foundseed, getSeedsCountByQuery_ae2(queries_tbl, cropdata, datasize, lang.searching)))
             else
                 local cropdata, datasize = getCropStatuses_default(transposer, configs.transposer_fromside)

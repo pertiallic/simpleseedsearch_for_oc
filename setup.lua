@@ -16,13 +16,11 @@ local lang = {
     "ja"
 }
 shell.execute("md sss")
-for _,s in ipairs(sss_scripts) do
-    shell.execute(string.format("wget %s/%s.lua", url, s))
-    shell.execute(string.format("mv %s.lua sss/%s.lua", s, s))
-end
 shell.execute("md sss/lang")
+for _,s in ipairs(sss_scripts) do
+    shell.execute(string.format("wget %s/%s.lua sss/%s.lua", url, s, s))
+end
 for _,l in ipairs(lang) do
-    shell.execute(string.format("wget %s/lang/%s.lua", url, l))
-    shell.execute(string.format("mv %s.lua sss/lang/%s.lua", l, l))
+    shell.execute(string.format("wget %s/lang/%s.lua sss/lang/%s.lua", url, l, l))
 end
 shell.setAlias("sss", "simpleseedsearch.lua")
